@@ -2,4 +2,12 @@
     <string name="app_name">SampleNavigation</string>
     <string name="mode">Mode of Transport:</string>
     <string name="navigate">NAVIGATE</string>
+    <string name="nointernet">No Internet Connection.Please connect to the Internet and Restart the Application</string>
+    <string name="nodatafetched">Connection Timed Out.Check your Internet Connectivity and Restart the Application</string>
+    <string name="connecterror">"Error while Connecting to the Server"</string>
+    <string name="nocoordinates">Location Coordinates are not Found</string>
+    <string name="datafetch">Please Wait Fetching Data from Server</string>
+    <string name="exceptionmessage">Exception Occurred:Please check the Logs</string>
+    <string name="car">Car</string>
+    <string name="train">Train</string>
 </resources>

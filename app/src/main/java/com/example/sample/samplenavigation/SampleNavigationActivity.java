@@ -20,10 +20,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -33,30 +33,28 @@ public class SampleNavigationActivity extends AppCompatActivity {
     private Spinner mSpinner = null;
     private TextView mTextView2 = null;
     private TextView mTextView3 = null;
-    private Button mButton = null;
     private JSONArray mJSONArray = null;
-    private String[] name_arr = null;
-    private ArrayAdapter<String> adapter = null;
     private Context mContext = null;
     private ProgressDialog Dialog = null;
     private Double mLatitude = null;
     private Double mLongitude = null;
-    private AlertDialog.Builder mAlertDialogbuild= null;
-    private HttpJSONParser mHttpJSONParser = null;
-    private JSONObject mJSONArrayObject = null;
+    private ArrayList<NavigationData> navigationData = null;
+    private static final String SERVER_URL="http://express-it.optusnet.com.au/sample.json";
+    private static final String KEY_NAME = "name";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_navigation);
+        mContext = this;
         mSpinner = (Spinner) findViewById(R.id.spinner);
-        mButton = (Button)findViewById(R.id.button);
+        Button mButton = (Button)findViewById(R.id.button);
         ConnectivityManager mConncMgr =  (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mNetworkInfo = mConncMgr.getActiveNetworkInfo();
         if (mNetworkInfo == null || (!mNetworkInfo.isConnected()))
         {
-            mAlertDialogbuild = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder mAlertDialogbuild = new AlertDialog.Builder(mContext);
             mAlertDialogbuild.setTitle(getResources().getString(R.string.app_name));
             mAlertDialogbuild.setMessage(getResources().getString(R.string.nointernet));
             mAlertDialogbuild.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -67,7 +65,7 @@ public class SampleNavigationActivity extends AppCompatActivity {
             AlertDialog mAlertDialog = mAlertDialogbuild.create();
             mAlertDialog.show();
         } else {
-            new AsyncOperation().execute(AppConstants.SERVER_URL);
+            new AsyncOperation().execute(SERVER_URL);
         }
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,8 +97,8 @@ public class SampleNavigationActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... params) {
-            mHttpJSONParser = new HttpJSONParser();
-            mJSONArray = mHttpJSONParser.getJSONData(AppConstants.SERVER_URL);
+            HttpJSONParser mHttpJSONParser = new HttpJSONParser();
+            mJSONArray = mHttpJSONParser.getJSONData(SERVER_URL);
             return null;
         }
 
@@ -115,8 +113,9 @@ public class SampleNavigationActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (Dialog.isShowing())
+            if (Dialog.isShowing()) {
                 Dialog.dismiss();
+            }
             showValues();
         }
 
@@ -130,6 +129,26 @@ public class SampleNavigationActivity extends AppCompatActivity {
             }
 
             public void onItemSelected(AdapterView<?> parent, View v, int pos, long row) {
+                String mModeCar ="";
+                String mModeTrain ="";
+                mLatitude = null;
+                mLongitude = null;
+
+                // set values to the TextViews
+                if(navigationData != null && navigationData.size() > 0) {
+                    mModeCar = navigationData.get(pos).getPlace().getCarValue();
+                    mTextView2.setText(getString(R.string.car)+ " - " + mModeCar);
+                    if(navigationData.get(pos).getPlace().getTrainValue() != null && navigationData.get(pos).getPlace().getTrainValue().length() > 0 ) {
+                        mModeTrain = navigationData.get(pos).getPlace().getTrainValue();
+                        mTextView3.setText( getString(R.string.train)+ "- " + mModeTrain);
+                    } else {
+                        mTextView3.setText("");
+                    }
+
+                    mLatitude  = navigationData.get(pos).getLocation().getLatitude();
+                    mLongitude = navigationData.get(pos).getLocation().getLongitude();
+                }
+
 
             }
 
@@ -138,8 +157,11 @@ public class SampleNavigationActivity extends AppCompatActivity {
             }
         }
 
-        //To Display updated fetched values from Server to the Screen
+        //To Display fetched values from Server to the Screen
         private void showValues(){
+            String[] name_arr;
+            navigationData = new ArrayList<>();
+            Gson gson = new Gson();
 
             if(mJSONArray != null)
                 name_arr = new String[mJSONArray.length()];
@@ -151,18 +173,19 @@ public class SampleNavigationActivity extends AppCompatActivity {
             }
             for (int i = 0; i < mJSONArray.length(); i++) {
                 try {
-                    NavigationData navigationData = new NavigationData();
-                    mJSONArrayObject = mJSONArray.getJSONObject(i);
+                    JSONObject mJSONArrayObject = mJSONArray.getJSONObject(i);
+                    NavigationData data = gson.fromJson(mJSONArrayObject.toString(),NavigationData.class);
+                    name_arr[i] = mJSONArrayObject.getString(KEY_NAME);
+                    navigationData.add(data);
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(),R.string.exceptionmessage,Toast.LENGTH_SHORT).show();
                     Log.e(TAG,"JSONException : " + e.getMessage());
-                    e.printStackTrace();
                 }
             }
 
             mTextView2 = (TextView)findViewById(R.id.textView2);
             mTextView3 = (TextView)findViewById(R.id.textView3);
-            adapter = new ArrayAdapter<String>(mContext,android.R.layout.simple_spinner_item,name_arr);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext,android.R.layout.simple_spinner_item,name_arr);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mSpinner.setAdapter(adapter);
             AdapterView.OnItemSelectedListener itemSelectedListener = new CustomOnItemSelectedListener(mContext);
@@ -174,6 +197,10 @@ public class SampleNavigationActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if(navigationData != null){
+            navigationData.clear();
+        }
     }
 
 }

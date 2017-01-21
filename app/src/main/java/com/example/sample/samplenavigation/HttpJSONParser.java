@@ -16,14 +16,13 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class HttpJSONParser {
     private String TAG = HttpJSONParser.this.getClass().getSimpleName();
-    String response="";
-    URL url;
-    JSONArray mJSONArray = null;
-    HttpURLConnection mHttpURLConnection = null;
-
-
+    private HttpURLConnection mHttpURLConnection;
 
     public JSONArray getJSONData(String path) {
+        String response="";
+        URL url;
+        JSONArray mJSONArray = null;
+
         try {
             url = new URL(path);
 
@@ -56,7 +55,6 @@ public class HttpJSONParser {
             mJSONArray = new JSONArray(response);
         }catch(JSONException ex){
             Log.e(TAG, "Exception Occured :" + ex.getMessage());
-            ex.printStackTrace();
         }
         return mJSONArray;
     }

@@ -1,6 +1,8 @@
 package com.example.sample.samplenavigation;
 
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 /**
@@ -9,16 +11,20 @@ import java.util.ArrayList;
 
 public class NavigationData {
 
+ @SerializedName("id")
  private String id;
+ @SerializedName("name")
  private String name;
- private ArrayList<Place> place;
- private ArrayList<LocationValues> location;
+ @SerializedName("fromcentral")
+ private Place place;
+ @SerializedName("location")
+ private LocationValues location;
 
   public NavigationData(){
       id = "";
       name = "";
-      place = null;
-      location = null;
+      place = new Place();
+      location = new LocationValues();
    }
 
     public String getId(){
@@ -37,24 +43,26 @@ public class NavigationData {
         this.name = name;
     }
 
-    public ArrayList<Place> getPlace(){
+    public Place getPlace(){
         return place;
     }
 
-    public ArrayList<LocationValues> getLocation(){
+    public LocationValues getLocation(){
         return location;
     }
 
-    public void setPlace(ArrayList<Place> place){
+    public void setPlace(Place place){
         this.place = place;
     }
 
-    public void setLocation(ArrayList<LocationValues> location){
+    public void setLocation(LocationValues location){
         this.location = location;
     }
 
     public class Place {
+        @SerializedName("car")
         private String car;
+        @SerializedName("train")
         private String train;
         public Place(){
             car = "";
@@ -74,10 +82,17 @@ public class NavigationData {
         public void setTrainValue(String train) {
             this.train = train;
         }
+
+        @Override
+        public String toString(){
+            return "[" + "car : " + getCarValue()+ " train: " + getTrainValue() + "]";
+        }
     }
 
     public class LocationValues {
+        @SerializedName("latitude")
         private Double latitude;
+        @SerializedName("longitude")
         private Double longitude;
         public LocationValues(){
             latitude = null;
@@ -95,10 +110,15 @@ public class NavigationData {
         public void setLongitude(Double longitude) {
             this.longitude = longitude;
         }
+
+        @Override
+        public String toString(){
+            return "[" + "latitude : " + getLatitude()+ " longitude: " + getLongitude() + "]";
+        }
     }
 
-    /*@Override
+    @Override
     public String toString(){
-        return "[" + "id : " + getId()+ " name: " + getName() + " fromcentral:" "]";
-    }*/
+        return "[" + "id : " + getId()+ " name: " + getName() + " fromcentral: " + getPlace() + " location: " + getLocation()+ "]";
+    }
 }
