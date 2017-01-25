@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sample.samplenavigation.databinding.ActivitySampleNavigationBinding;
 import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,9 +32,6 @@ import java.util.Locale;
 public class SampleNavigationActivity extends AppCompatActivity {
 
     private String TAG = SampleNavigationActivity.this.getClass().getSimpleName();
-    private Spinner mSpinner = null;
-    private TextView mTextView2 = null;
-    private TextView mTextView3 = null;
     private JSONArray mJSONArray = null;
     private Context mContext = null;
     private ProgressDialog Dialog = null;
@@ -41,15 +40,13 @@ public class SampleNavigationActivity extends AppCompatActivity {
     private ArrayList<NavigationData> navigationData = null;
     private static final String SERVER_URL="http://express-it.optusnet.com.au/sample.json";
     private static final String KEY_NAME = "name";
-
+    ActivitySampleNavigationBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sample_navigation);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_sample_navigation);
         mContext = this;
-        mSpinner = (Spinner) findViewById(R.id.spinner);
-        Button mButton = (Button)findViewById(R.id.button);
         ConnectivityManager mConncMgr =  (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mNetworkInfo = mConncMgr.getActiveNetworkInfo();
         if (mNetworkInfo == null || (!mNetworkInfo.isConnected()))
@@ -67,7 +64,7 @@ public class SampleNavigationActivity extends AppCompatActivity {
         } else {
             new AsyncOperation().execute(SERVER_URL);
         }
-        mButton.setOnClickListener(new View.OnClickListener() {
+        binding.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(mLatitude != null && mLongitude != null){
@@ -137,12 +134,12 @@ public class SampleNavigationActivity extends AppCompatActivity {
                 // set values to the TextViews
                 if(navigationData != null && navigationData.size() > 0) {
                     mModeCar = navigationData.get(pos).getPlace().getCarValue();
-                    mTextView2.setText(getString(R.string.car)+ " - " + mModeCar);
+                    binding.textView2.setText(getString(R.string.car)+ " - " + mModeCar);
                     if(navigationData.get(pos).getPlace().getTrainValue() != null && navigationData.get(pos).getPlace().getTrainValue().length() > 0 ) {
                         mModeTrain = navigationData.get(pos).getPlace().getTrainValue();
-                        mTextView3.setText( getString(R.string.train)+ "- " + mModeTrain);
+                        binding.textView3.setText( getString(R.string.train)+ "- " + mModeTrain);
                     } else {
-                        mTextView3.setText("");
+                        binding.textView3.setText("");
                     }
 
                     mLatitude  = navigationData.get(pos).getLocation().getLatitude();
@@ -183,13 +180,11 @@ public class SampleNavigationActivity extends AppCompatActivity {
                 }
             }
 
-            mTextView2 = (TextView)findViewById(R.id.textView2);
-            mTextView3 = (TextView)findViewById(R.id.textView3);
             ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext,android.R.layout.simple_spinner_item,name_arr);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mSpinner.setAdapter(adapter);
+            binding.spinner.setAdapter(adapter);
             AdapterView.OnItemSelectedListener itemSelectedListener = new CustomOnItemSelectedListener(mContext);
-            mSpinner.setOnItemSelectedListener(itemSelectedListener);
+            binding.spinner.setOnItemSelectedListener(itemSelectedListener);
         }
 
     }
